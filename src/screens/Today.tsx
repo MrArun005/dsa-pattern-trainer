@@ -25,7 +25,7 @@ export function Today({ store }: { store: Store }) {
                 {lastSession(progress.sessions, today)}
               </div>
             </div>
-            <a className="btn push" href={cardHref(due[0])}>START REVIEW →</a>
+            <a className="btn push" href="#/session">start review</a>
           </div>
         ) : fresh.length === ids.length ? (
           <div className="hero">
@@ -34,7 +34,7 @@ export function Today({ store }: { store: Store }) {
               <div>nothing learned yet — {fresh.length} cards waiting</div>
               <div className="under">start with the two-pointers template, everything else builds on it</div>
             </div>
-            <a className="btn push" href="#/two-pointers">START LEARNING →</a>
+            <a className="btn push" href="#/two-pointers">start learning</a>
           </div>
         ) : (
           <div className="hero">

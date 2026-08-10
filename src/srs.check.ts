@@ -1,6 +1,6 @@
 // Self-check for the scheduler: npm run check.
 // ponytail: two assert helpers, no test framework. Add one if this outgrows a screen.
-import { LADDER, addDays, daysBetween, isDue, newCard, recallRate, review, streak } from './srs.ts'
+import { LADDER, addDays, daysBetween, isDue, longestStreak, newCard, recallRate, review, streak } from './srs.ts'
 
 let checks = 0
 
@@ -75,6 +75,13 @@ eq(streak(['2026-08-10'], T), 1, 'today alone is a streak of one')
 eq(streak(['2026-08-08', '2026-08-09'], T), 2, 'a streak ending yesterday still counts')
 eq(streak(['2026-08-07', '2026-08-09', '2026-08-10'], T), 2, 'a gap breaks the streak')
 eq(streak(['2026-08-01'], T), 0, 'stale history is not a streak')
+
+// longest streak looks at the whole history, not just the tail
+eq(longestStreak([]), 0, 'no history has no longest streak')
+eq(longestStreak(['2026-08-01']), 1, 'a single day is a run of one')
+eq(longestStreak(['2026-07-01', '2026-07-02', '2026-07-03', '2026-08-01']), 3, 'finds a past run')
+eq(longestStreak(['2026-08-02', '2026-08-01', '2026-08-03']), 3, 'order of input does not matter')
+eq(longestStreak(['2026-08-01', '2026-08-01', '2026-08-02']), 2, 'duplicate days count once')
 
 // recall rate
 eq(recallRate([]), 0, 'no reviews is zero recall')

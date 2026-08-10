@@ -74,6 +74,18 @@ export function streak(sessions: string[], today: string): number {
   return n
 }
 
+/** Longest run of consecutive active days anywhere in the history. */
+export function longestStreak(sessions: string[]): number {
+  const days = [...new Set(sessions)].sort()
+  let best = 0
+  let run = 0
+  for (let i = 0; i < days.length; i++) {
+    run = i > 0 && daysBetween(days[i - 1], days[i]) === 1 ? run + 1 : 1
+    best = Math.max(best, run)
+  }
+  return best
+}
+
 /** Share of reviews graded solid on their first attempt of the day. */
 export function recallRate(cards: CardState[]): number {
   const all = cards.flatMap((c) => c.history)

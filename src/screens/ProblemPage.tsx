@@ -19,6 +19,7 @@ export function ProblemPage({ pattern, problem, store }: { pattern: Pattern; pro
   const [code, setCode] = useState(() => localStorage.getItem(key) ?? problem.stub[lang])
   const [result, setResult] = useState<RunResult | null>(null)
   const [running, setRunning] = useState(false)
+  const [status, setStatus] = useState('')
   const [attempted, setAttempted] = useState(false)
   const [revealed, setRevealed] = useState(false)
   const [hintsOpened, setHintsOpened] = useState(0)
@@ -35,8 +36,10 @@ export function ProblemPage({ pattern, problem, store }: { pattern: Pattern; pro
 
   const execute = async () => {
     setRunning(true)
-    setResult(await run(lang, code, problem.fn[lang], problem.tests))
+    setStatus('')
+    setResult(await run(lang, code, problem.fn[lang], problem.tests, setStatus))
     setRunning(false)
+    setStatus('')
     setAttempted(true)
   }
 
@@ -95,7 +98,7 @@ export function ProblemPage({ pattern, problem, store }: { pattern: Pattern; pro
 
         <section>
           <div className="lab">results</div>
-          <Results result={result} running={running} />
+          <Results result={result} running={running} status={status} />
 
           {passed && (
             <>
@@ -148,8 +151,8 @@ export function ProblemPage({ pattern, problem, store }: { pattern: Pattern; pro
   )
 }
 
-function Results({ result, running }: { result: RunResult | null; running: boolean }) {
-  if (running) return <div className="meta faint">running in a worker…</div>
+function Results({ result, running, status }: { result: RunResult | null; running: boolean; status: string }) {
+  if (running) return <div className="banner">{status || 'running in a worker…'}</div>
   if (!result) return <div className="meta faint">nothing run yet. ⌘↵ in the editor.</div>
 
   if (result.kind === 'timeout')

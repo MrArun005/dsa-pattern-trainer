@@ -175,5 +175,343 @@ for r, x in enumerate(nums):
         'Return 0, not Infinity, when nothing qualifies. Pick the not-found value before you write the loop.',
       ],
     },
+    {
+      id: 'char-replacement',
+      title: 'Longest repeating character replacement',
+      difficulty: 'medium',
+      prompt:
+        'Given a string and an integer k, you may replace at most k characters with any other character. Return the length of the longest run of a single repeated character you can produce.',
+      trick: 'A window is valid while its size minus its most common character is at most k.',
+      fn: { js: 'characterReplacement', py: 'character_replacement' },
+      stub: {
+        js: `function characterReplacement(s, k) {\n  \n}`,
+        py: `def character_replacement(s, k):\n    pass`,
+      },
+      solution: {
+        js: `function characterReplacement(s, k) {
+  const count = new Map()
+  let l = 0, best = 0
+  for (let r = 0; r < s.length; r++) {
+    count.set(s[r], (count.get(s[r]) ?? 0) + 1)
+    while (r - l + 1 - Math.max(...count.values()) > k) {
+      count.set(s[l], count.get(s[l]) - 1)
+      if (count.get(s[l]) === 0) count.delete(s[l])
+      l++
+    }
+    best = Math.max(best, r - l + 1)
+  }
+  return best
+}`,
+        py: `def character_replacement(s, k):
+    count = {}
+    l = best = 0
+    for r, c in enumerate(s):
+        count[c] = count.get(c, 0) + 1
+        while (r - l + 1) - max(count.values()) > k:
+            count[s[l]] -= 1
+            if count[s[l]] == 0:
+                del count[s[l]]
+            l += 1
+        best = max(best, r - l + 1)
+    return best`,
+      },
+      tests: [
+        { args: ['ABAB', 2], expected: 4 },
+        { args: ['AABABBA', 1], expected: 4 },
+        { args: ['AAAA', 0], expected: 4 },
+        { args: ['', 2], expected: 0 },
+        { args: ['ABCDE', 1], expected: 2 },
+      ],
+      hints: [
+        'You never actually perform replacements. What has to be true about a window for k replacements to make it uniform?',
+        'Every character except the most frequent one has to be replaced. So: size − maxCount ≤ k.',
+        'Keep a frequency map of the window and shrink from the left while that inequality fails.',
+      ],
+    },
+    {
+      id: 'permutation-in-string',
+      title: 'Permutation in string',
+      difficulty: 'medium',
+      prompt: 'Return true if any permutation of s1 appears as a contiguous substring of s2.',
+      trick: 'A fixed window the length of s1, comparing character counts rather than order.',
+      fn: { js: 'checkInclusion', py: 'check_inclusion' },
+      stub: {
+        js: `function checkInclusion(s1, s2) {\n  \n}`,
+        py: `def check_inclusion(s1, s2):\n    pass`,
+      },
+      solution: {
+        js: `function checkInclusion(s1, s2) {
+  if (s1.length > s2.length) return false
+  const need = new Map(), win = new Map()
+  for (const c of s1) need.set(c, (need.get(c) ?? 0) + 1)
+
+  const matches = () => {
+    if (win.size !== need.size) return false
+    for (const [c, n] of need) if (win.get(c) !== n) return false
+    return true
+  }
+
+  for (let r = 0; r < s2.length; r++) {
+    win.set(s2[r], (win.get(s2[r]) ?? 0) + 1)
+    if (r >= s1.length) {
+      const out = s2[r - s1.length]
+      const n = win.get(out) - 1
+      if (n === 0) win.delete(out)
+      else win.set(out, n)
+    }
+    if (matches()) return true
+  }
+  return false
+}`,
+        py: `def check_inclusion(s1, s2):
+    from collections import Counter
+    if len(s1) > len(s2):
+        return False
+    need = Counter(s1)
+    win = Counter(s2[:len(s1)])
+    if win == need:
+        return True
+    for r in range(len(s1), len(s2)):
+        win[s2[r]] += 1
+        out = s2[r - len(s1)]
+        win[out] -= 1
+        if win[out] == 0:
+            del win[out]
+        if win == need:
+            return True
+    return False`,
+      },
+      tests: [
+        { args: ['ab', 'eidbaooo'], expected: true },
+        { args: ['ab', 'eidboaoo'], expected: false },
+        { args: ['adc', 'dcda'], expected: true },
+        { args: ['a', 'a'], expected: true },
+        { args: ['abc', 'ab'], expected: false },
+      ],
+      hints: [
+        'Generating every permutation is factorial. What actually makes two strings permutations of each other?',
+        'Identical character counts. So the window is fixed-width and you compare frequency maps.',
+        'Do not rebuild the map each step — one character enters and one leaves, and remember to delete keys that hit zero or the comparison breaks.',
+      ],
+    },
+    {
+      id: 'max-consecutive-ones',
+      title: 'Max consecutive ones III',
+      difficulty: 'medium',
+      prompt:
+        'Given a binary array and an integer k, return the length of the longest run of 1s you can get by flipping at most k zeros.',
+      trick: 'Grow the window freely; shrink only while it holds more than k zeros.',
+      fn: { js: 'longestOnes', py: 'longest_ones' },
+      stub: { js: `function longestOnes(nums, k) {\n  \n}`, py: `def longest_ones(nums, k):\n    pass` },
+      solution: {
+        js: `function longestOnes(nums, k) {
+  let l = 0, zeros = 0, best = 0
+  for (let r = 0; r < nums.length; r++) {
+    if (nums[r] === 0) zeros++
+    while (zeros > k) {
+      if (nums[l] === 0) zeros--
+      l++
+    }
+    best = Math.max(best, r - l + 1)
+  }
+  return best
+}`,
+        py: `def longest_ones(nums, k):
+    l = zeros = best = 0
+    for r, x in enumerate(nums):
+        if x == 0:
+            zeros += 1
+        while zeros > k:
+            if nums[l] == 0:
+                zeros -= 1
+            l += 1
+        best = max(best, r - l + 1)
+    return best`,
+      },
+      tests: [
+        { args: [[1, 1, 1, 0, 0, 0, 1, 1, 1, 1, 0], 2], expected: 6 },
+        { args: [[0, 0, 1, 1, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 0, 1, 1, 1, 1], 3], expected: 10 },
+        { args: [[1, 1, 1], 0], expected: 3 },
+        { args: [[0, 0, 0], 0], expected: 0 },
+      ],
+      hints: [
+        'You do not need to track which zeros you flipped — only how many are inside the window.',
+        'This is the same shape as "longest substring with at most k of something".',
+        'One counter, one while loop. The answer is the largest window you ever held.',
+      ],
+    },
+    {
+      id: 'fruit-into-baskets',
+      title: 'Fruit into baskets',
+      difficulty: 'medium',
+      prompt:
+        'Given an array of fruit types, return the length of the longest contiguous run containing at most two distinct types.',
+      trick: 'Longest window with at most two distinct keys — the map size is the condition.',
+      fn: { js: 'totalFruit', py: 'total_fruit' },
+      stub: { js: `function totalFruit(fruits) {\n  \n}`, py: `def total_fruit(fruits):\n    pass` },
+      solution: {
+        js: `function totalFruit(fruits) {
+  const count = new Map()
+  let l = 0, best = 0
+  for (let r = 0; r < fruits.length; r++) {
+    count.set(fruits[r], (count.get(fruits[r]) ?? 0) + 1)
+    while (count.size > 2) {
+      const out = fruits[l]
+      const n = count.get(out) - 1
+      if (n === 0) count.delete(out)
+      else count.set(out, n)
+      l++
+    }
+    best = Math.max(best, r - l + 1)
+  }
+  return best
+}`,
+        py: `def total_fruit(fruits):
+    count = {}
+    l = best = 0
+    for r, f in enumerate(fruits):
+        count[f] = count.get(f, 0) + 1
+        while len(count) > 2:
+            out = fruits[l]
+            count[out] -= 1
+            if count[out] == 0:
+                del count[out]
+            l += 1
+        best = max(best, r - l + 1)
+    return best`,
+      },
+      tests: [
+        { args: [[1, 2, 1]], expected: 3 },
+        { args: [[0, 1, 2, 2]], expected: 3 },
+        { args: [[1, 2, 3, 2, 2]], expected: 4 },
+        { args: [[3, 3, 3, 1, 2, 1, 1, 2, 3, 3, 4]], expected: 5 },
+        { args: [[1]], expected: 1 },
+      ],
+      hints: [
+        '"Two baskets" is just a cap on distinct values. Generalise it to k and the problem gets easier to see.',
+        'The map size *is* the number of distinct types in the window.',
+        'Delete a key when its count reaches zero, or size never shrinks and the window grows forever.',
+      ],
+    },
+    {
+      id: 'min-window-substring',
+      title: 'Minimum window substring',
+      difficulty: 'hard',
+      prompt:
+        'Given strings s and t, return the shortest substring of s containing every character of t including duplicates. Return "" if there is none.',
+      trick: 'Count what is still missing; when nothing is missing, shrink from the left.',
+      fn: { js: 'minWindow', py: 'min_window' },
+      stub: { js: `function minWindow(s, t) {\n  \n}`, py: `def min_window(s, t):\n    pass` },
+      solution: {
+        js: `function minWindow(s, t) {
+  if (!s || !t) return ''
+  const need = new Map()
+  for (const c of t) need.set(c, (need.get(c) ?? 0) + 1)
+
+  let missing = t.length, l = 0, bestL = 0, bestLen = Infinity
+  for (let r = 0; r < s.length; r++) {
+    const c = s[r]
+    if (need.has(c)) {
+      if (need.get(c) > 0) missing--
+      need.set(c, need.get(c) - 1)
+    }
+    while (missing === 0) {
+      if (r - l + 1 < bestLen) { bestLen = r - l + 1; bestL = l }
+      const d = s[l]
+      if (need.has(d)) {
+        need.set(d, need.get(d) + 1)
+        if (need.get(d) > 0) missing++
+      }
+      l++
+    }
+  }
+  return bestLen === Infinity ? '' : s.slice(bestL, bestL + bestLen)
+}`,
+        py: `def min_window(s, t):
+    if not s or not t:
+        return ''
+    from collections import Counter
+    need = Counter(t)
+    missing = len(t)
+    l = best_l = 0
+    best_len = float('inf')
+    for r, c in enumerate(s):
+        if c in need:
+            if need[c] > 0:
+                missing -= 1
+            need[c] -= 1
+        while missing == 0:
+            if r - l + 1 < best_len:
+                best_len = r - l + 1
+                best_l = l
+            d = s[l]
+            if d in need:
+                need[d] += 1
+                if need[d] > 0:
+                    missing += 1
+            l += 1
+    return '' if best_len == float('inf') else s[best_l:best_l + best_len]`,
+      },
+      tests: [
+        { args: ['ADOBECODEBANC', 'ABC'], expected: 'BANC' },
+        { args: ['a', 'a'], expected: 'a' },
+        { args: ['a', 'aa'], expected: '' },
+        { args: ['aa', 'aa'], expected: 'aa' },
+        { args: ['ab', 'b'], expected: 'b' },
+      ],
+      hints: [
+        'Duplicates are what makes this hard. "Contains all of ABC" is not the same as "contains A, B and C once".',
+        'Let counts go negative for surplus characters. A single missing counter then tells you when the window is valid.',
+        'Only decrement missing when the need count is still positive — that is what stops surplus copies counting as progress.',
+      ],
+    },
+    {
+      id: 'sliding-window-maximum',
+      title: 'Sliding window maximum',
+      difficulty: 'hard',
+      prompt: 'Given an array and window size k, return the maximum of every window of size k, in order.',
+      trick: 'Keep a deque of indices whose values are decreasing; the front is always the max.',
+      fn: { js: 'maxSlidingWindow', py: 'max_sliding_window' },
+      stub: {
+        js: `function maxSlidingWindow(nums, k) {\n  \n}`,
+        py: `def max_sliding_window(nums, k):\n    pass`,
+      },
+      solution: {
+        js: `function maxSlidingWindow(nums, k) {
+  const out = [], dq = []
+  for (let r = 0; r < nums.length; r++) {
+    while (dq.length && nums[dq[dq.length - 1]] <= nums[r]) dq.pop()
+    dq.push(r)
+    if (dq[0] <= r - k) dq.shift()
+    if (r >= k - 1) out.push(nums[dq[0]])
+  }
+  return out
+}`,
+        py: `def max_sliding_window(nums, k):
+    from collections import deque
+    out = []
+    dq = deque()
+    for r, x in enumerate(nums):
+        while dq and nums[dq[-1]] <= x:
+            dq.pop()
+        dq.append(r)
+        if dq[0] <= r - k:
+            dq.popleft()
+        if r >= k - 1:
+            out.append(nums[dq[0]])
+    return out`,
+      },
+      tests: [
+        { args: [[1, 3, -1, -3, 5, 3, 6, 7], 3], expected: [3, 3, 5, 5, 6, 7] },
+        { args: [[1], 1], expected: [1] },
+        { args: [[9, 8, 7, 6], 2], expected: [9, 8, 7] },
+        { args: [[1, 2, 3, 4], 4], expected: [4] },
+      ],
+      hints: [
+        'Recomputing the max per window is O(n·k). The waste is re-examining elements you already compared.',
+        'If a new element is bigger than the ones behind it, those can never be the max again — drop them.',
+        'Store indices, not values, so you can tell when the front has slid out of the window.',
+      ],
+    },
   ],
 }
