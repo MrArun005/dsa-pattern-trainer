@@ -44,6 +44,7 @@ export function Progress({ store }: { store: Store }) {
 
       <section className="section">
         <div className="lab">where each pattern stands</div>
+        <div className="panel" style={{ padding: 'var(--s4) var(--s5)' }}>
         <table className="grid">
           <thead>
             <tr>
@@ -72,6 +73,7 @@ export function Progress({ store }: { store: Store }) {
             })}
           </tbody>
         </table>
+        </div>
       </section>
 
       <section className="section">
@@ -99,9 +101,9 @@ export function Progress({ store }: { store: Store }) {
 
 function Stat({ label, value }: { label: string; value: string }) {
   return (
-    <div>
-      <div className="lab">{label}</div>
-      <div className="num" style={{ font: '400 34px/1 var(--serif)' }}>{value}</div>
+    <div className="panel" style={{ padding: 'var(--s4)' }}>
+      <div className="lab" style={{ marginBottom: 'var(--s2)' }}>{label}</div>
+      <div className="num" style={{ font: '400 32px/1 var(--serif)' }}>{value}</div>
     </div>
   )
 }

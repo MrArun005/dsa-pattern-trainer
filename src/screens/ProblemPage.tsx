@@ -98,6 +98,7 @@ export function ProblemPage({ pattern, problem, store }: { pattern: Pattern; pro
 
         <section>
           <div className="lab">results</div>
+          <div className="panel">
           <Results result={result} running={running} status={status} />
 
           {passed && (
@@ -116,6 +117,7 @@ export function ProblemPage({ pattern, problem, store }: { pattern: Pattern; pro
               </div>
             </>
           )}
+          </div>
         </section>
       </div>
 
